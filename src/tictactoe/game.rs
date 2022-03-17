@@ -91,6 +91,7 @@ impl ToString for Game {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub enum GameResult {
     Win(Player),
     Draw,
@@ -191,5 +192,85 @@ mod test {
         let point = Point::from_str("A");
         assert!(point.is_err());
         assert_eq!(point.unwrap_err(), PointError::BadLen);
+    }
+
+    #[test]
+    fn game_is_player_win() {
+        let game = Game {
+            board: [
+                Some(Player::O), Some(Player::X), Some(Player::O),
+                Some(Player::X), Some(Player::X), Some(Player::O),
+                Some(Player::X), Some(Player::O), Some(Player::O),
+            ],
+            turn: Player::X,
+        };
+
+        assert!(game.is_player_win(Player::O));
+    }
+
+    #[test]
+    fn game_is_board_full() {
+        let game = Game {
+            board: [
+                Some(Player::O), Some(Player::X), Some(Player::O),
+                Some(Player::X), Some(Player::O), Some(Player::O),
+                Some(Player::X), Some(Player::O), Some(Player::X),
+            ],
+            turn: Player::X,
+        };
+
+        assert!(game.is_board_full());
+    }
+
+    #[test]
+    fn game_is_board_not_full() {
+        let game = Game {
+            board: [
+                Some(Player::O), Some(Player::X), Some(Player::O),
+                Some(Player::X), Some(Player::O), Some(Player::O),
+                Some(Player::X), Some(Player::O), None,
+            ],
+            turn: Player::X,
+        };
+
+        assert!(!game.is_board_full());
+    }
+
+    #[test]
+    fn game_is_result_undetermined() {
+        let game = Game {
+            board: [
+                Some(Player::O), Some(Player::X), Some(Player::O),
+                Some(Player::X), Some(Player::O), Some(Player::O),
+                Some(Player::X), Some(Player::O), None,
+            ],
+            turn: Player::X,
+        };
+
+        assert_eq!(game.get_result(), GameResult::Undetermined);
+    }
+
+    #[test]
+    fn game_is_result_draw() {
+        let game = Game {
+            board: [
+                Some(Player::O), Some(Player::X), Some(Player::O),
+                Some(Player::X), Some(Player::O), Some(Player::O),
+                Some(Player::X), Some(Player::O), Some(Player::X),
+            ],
+            turn: Player::O,
+        };
+
+        assert_eq!(game.get_result(), GameResult::Draw);
+    }
+
+    #[test]
+    fn game_change_turn_after_proceed() {
+        let mut game = Game {
+            board: [None; 9],
+            turn: Player::O,
+        };
+        game.proceed();
+        assert_eq!(game.turn, Player::X);
     }
 }
